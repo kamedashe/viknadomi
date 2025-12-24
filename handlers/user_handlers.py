@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 
 from states import Registration
 from keyboards import request_phone_kb, admin_approval_kb, MenuCallback
-from config import ADMIN_IDS
+from config import ADMIN_IDS, MAIN_MENU_BANNER
 from database.requests import get_user, add_user
 
 user_router = Router()
@@ -17,8 +17,9 @@ async def cmd_start(message: Message, state: FSMContext):
     
     # Check if admin
     if user_id in ADMIN_IDS:
-        await message.answer(
-            "Ласкаво просимо! Ви успішно авторизовані (Адмін).", 
+        await message.answer_photo(
+            photo=MAIN_MENU_BANNER,
+            caption="<b>Ласкаво просимо!</b>\nВи успішно авторизовані (Адмін).",
             reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="📂 Відкрити меню", callback_data=MenuCallback(path="").pack())]])
         )
         return
@@ -26,8 +27,9 @@ async def cmd_start(message: Message, state: FSMContext):
     user = await get_user(user_id)
     if user:
         if user.is_approved:
-            await message.answer(
-                "Ласкаво просимо! Ви успішно авторизовані.", 
+            await message.answer_photo(
+                photo=MAIN_MENU_BANNER,
+                caption="<b>Ласкаво просимо!</b>\nВи успішно авторизовані.",
                 reply_markup=InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="📂 Відкрити меню", callback_data=MenuCallback(path="").pack())]])
             )
         else:

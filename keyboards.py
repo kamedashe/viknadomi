@@ -12,6 +12,10 @@ class GalleryCallback(CallbackData, prefix="gallery", sep="|"):
     page: int
     parent_path: str
 
+class ManageMediaCallback(CallbackData, prefix="manage", sep="|"):
+    action: str  # 'prev', 'next', 'delete', 'close'
+    index: int
+
 def request_phone_kb():
     return ReplyKeyboardMarkup(
         keyboard=[
@@ -128,5 +132,30 @@ def build_user_management_keyboard(users: list) -> InlineKeyboardMarkup:
             InlineKeyboardButton(text=display_text, callback_data="noop"),
             InlineKeyboardButton(text=btn_text, callback_data=callback_data)
         )
+    
+    return builder.as_markup()
+
+def build_manage_media_keyboard(index: int, total: int) -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    
+    # Navigation row
+    prev_idx = (index - 1) % total
+    next_idx = (index + 1) % total
+    
+    builder.row(
+        InlineKeyboardButton(text="⬅️ Попереднє", callback_data=ManageMediaCallback(action="prev", index=prev_idx).pack()),
+        InlineKeyboardButton(text=f"{index + 1}/{total}", callback_data="noop"),
+        InlineKeyboardButton(text="Наступне ➡️", callback_data=ManageMediaCallback(action="next", index=next_idx).pack())
+    )
+    
+    # Action row
+    builder.row(
+        InlineKeyboardButton(text="🗑 Видалити файл", callback_data=ManageMediaCallback(action="delete", index=index).pack())
+    )
+    
+    # Close row
+    builder.row(
+        InlineKeyboardButton(text="❌ Закрити", callback_data=ManageMediaCallback(action="close", index=index).pack())
+    )
     
     return builder.as_markup()
