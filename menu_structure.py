@@ -5,7 +5,10 @@ MENU_STRUCTURE = {
                 "Каталог дверей": "https://t.me/viknadomi_2/11",
                 "Технічна інформація": "https://t.me/viknadomi_3/1",
                 "Види замків": "GALLERY_PVC_DOOR_LOCKS",
-                "Ручки": "GALLERY_PVC_DOOR_HANDLES"
+                "Ручки": {
+                    "Нажимні ручки": "GALLERY_PVC_DOOR_HANDLES_PUSH",
+                    "Ручка пряма": "GALLERY_PVC_DOOR_HANDLES_STRAIGHT"
+                }
             },
             "Вікна": {
                 "Профільні системи": "GALLERY_PVC_WIN_PROFILES",
