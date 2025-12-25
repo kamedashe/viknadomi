@@ -13,7 +13,7 @@ MENU_STRUCTURE = {
                 "Фурнітура": "CATALOG_PVC_WIN_HARDWARE",
                 "Інше": {
                     "Детально про вікна": "https://t.me/viknadomi_3/3",
-                    "Ручки": "CATALOG_PVC_WIN_HANDLES",
+                    "Ручки": "GALLERY_PVC_WIN_HANDLES",
                     "Кольорові вікна": {
                         "Білий": "https://t.me/viknadomi_3/5",
                         "Антрацит 7016": "https://t.me/viknadomi_3/7",
@@ -28,8 +28,8 @@ MENU_STRUCTURE = {
                         "Перламутровий 1015": "https://t.me/viknadomi_3/25",
                         "Лебединий": "https://t.me/viknadomi_3/27"
                     },
-                    "Шпроси": "CATALOG_PVC_WIN_SPROS",
-                    "Арки": "CATALOG_PVC_WIN_ARCH"
+                    "Шпроси": "GALLERY_PVC_WIN_SPROS",
+                    "Арки": "GALLERY_PVC_WIN_ARCH"
                 }
             },
             "Розсувки": {
@@ -65,13 +65,13 @@ MENU_STRUCTURE = {
         },
         "Інше (Сітки, Ворота...)": {
             "Сітки": {
-                "Фіксовані на гачках": "GALLERY_NET_FIX",
-                "Плісе (гармошка)": "GALLERY_NET_PLISSE",
-                "Ролетні": "GALLERY_NET_ROLL",
-                "Слайдер": "GALLERY_NET_SLIDE"
+                "Фіксовані на гачках": "CATALOG_NET_FIX",
+                "Плісе (гармошка)": "CATALOG_NET_PLISSE",
+                "Ролетні": "CATALOG_NET_ROLL",
+                "Слайдер": "CATALOG_NET_SLIDE"
             },
-            "Ворота": "GALLERY_GATES",
-            "Дерево": "GALLERY_WOOD"
+            "Ворота": "CATALOG_GATES",
+            "Дерево": "CATALOG_WOOD"
         }
     },
     "Каталоги": {
