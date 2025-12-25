@@ -4,8 +4,11 @@ MENU_STRUCTURE = {
             "Двері": {
                 "Каталог дверей": "https://t.me/viknadomi_2/11",
                 "Технічна інформація": "https://t.me/viknadomi_3/1",
-                "Види замків": "CATALOG_PVC_DOOR_LOCKS",      # БУЛО GALLERY_
-                "Ручки": "CATALOG_PVC_DOOR_HANDLES"           # БУЛО GALLERY_
+                "Види замків": "CATALOG_PVC_DOOR_LOCKS",
+                "Ручки": {
+                    "Нажимні ручки": "CATALOG_PVC_DOOR_HANDLES_PUSH",       # Повернув підпункт
+                    "Ручка пряма": "CATALOG_PVC_DOOR_HANDLES_STRAIGHT"      # Повернув підпункт
+                }
             },
             "Вікна": {
                 "Профільні системи": "CATALOG_PVC_WIN_PROFILES",
@@ -13,7 +16,7 @@ MENU_STRUCTURE = {
                 "Фурнітура": "CATALOG_PVC_WIN_HARDWARE",
                 "Інше": {
                     "Детально про вікна": "https://t.me/viknadomi_3/3",
-                    "Ручки": "CATALOG_PVC_WIN_HANDLES",       # БУЛО GALLERY_
+                    "Ручки": "CATALOG_PVC_WIN_HANDLES",
                     "Кольорові вікна": {
                         "Білий": "https://t.me/viknadomi_3/5",
                         "Антрацит 7016": "https://t.me/viknadomi_3/7",
@@ -28,8 +31,8 @@ MENU_STRUCTURE = {
                         "Перламутровий 1015": "https://t.me/viknadomi_3/25",
                         "Лебединий": "https://t.me/viknadomi_3/27"
                     },
-                    "Шпроси": "CATALOG_PVC_WIN_SPROS",        # БУЛО GALLERY_
-                    "Арки": "CATALOG_PVC_WIN_ARCH"            # БУЛО GALLERY_
+                    "Шпроси": "CATALOG_PVC_WIN_SPROS",
+                    "Арки": "CATALOG_PVC_WIN_ARCH"
                 }
             },
             "Розсувки": {
