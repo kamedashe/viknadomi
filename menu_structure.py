@@ -1,6 +1,6 @@
 MENU_STRUCTURE = {
     "Фото-відео": {
-        "ПВХ конструкції": {
+        "Вікна, двері, розсувки ПВХ": {
             "Двері": {
                 "Каталог дверей": "https://t.me/viknadomi_2/11",
                 "Технічна інформація": "https://t.me/viknadomi_3/1",
@@ -49,7 +49,7 @@ MENU_STRUCTURE = {
             "Моноблок SKT": "GALLERY_ROLL_SKT",
             "Короба (касонетті)": "GALLERY_ROLL_BOX",
             "Короб на вулиці SK": "GALLERY_ROLL_STREET",
-            "Продовження вікна": "GALLERY_ROLL_EXT",
+            "Продовження вікна (Іспанія)": "GALLERY_ROLL_EXT",
             "Наші роботи": "https://t.me/viknadomi_2/3"
         },
         "Міжкімнатні двері": {
@@ -66,7 +66,7 @@ MENU_STRUCTURE = {
             "Розсувки": "GALLERY_ALUM_SLIDE",
             "Наші роботи": "https://t.me/viknadomi_2/5"
         },
-        "Інше (Сітки, Ворота...)": {
+        "Інше": {
             "Сітки": {
                 "Фіксовані на гачках": "GALLERY_NET_FIX",
                 "Плісе (гармошка)": "GALLERY_NET_PLISSE",
