@@ -1,22 +1,19 @@
 MENU_STRUCTURE = {
     "Фото-відео": {
-        "Вікна, двері, розсувки ПВХ": {
+        "ПВХ конструкції": {
             "Двері": {
                 "Каталог дверей": "https://t.me/viknadomi_2/11",
                 "Технічна інформація": "https://t.me/viknadomi_3/1",
                 "Види замків": "GALLERY_PVC_DOOR_LOCKS",
-                "Ручки": {
-                    "Нажимні ручки": "GALLERY_PVC_DOOR_HANDLES_PUSH",
-                    "Ручка пряма": "GALLERY_PVC_DOOR_HANDLES_STRAIGHT"
-                }
+                "Ручки": "GALLERY_PVC_DOOR_HANDLES"
             },
             "Вікна": {
-                "Профільні системи": "GALLERY_PVC_WIN_PROFILES",
-                "Склопакет": "GALLERY_PVC_WIN_GLASS",
-                "Фурнітура": "GALLERY_PVC_WIN_HARDWARE",
+                "Профільні системи": "CATALOG_PVC_WIN_PROFILES",
+                "Склопакет": "CATALOG_PVC_WIN_GLASS",
+                "Фурнітура": "CATALOG_PVC_WIN_HARDWARE",
                 "Інше": {
                     "Детально про вікна": "https://t.me/viknadomi_3/3",
-                    "Ручки": "GALLERY_PVC_WIN_HANDLES",
+                    "Ручки": "CATALOG_PVC_WIN_HANDLES",
                     "Кольорові вікна": {
                         "Білий": "https://t.me/viknadomi_3/5",
                         "Антрацит 7016": "https://t.me/viknadomi_3/7",
@@ -31,42 +28,42 @@ MENU_STRUCTURE = {
                         "Перламутровий 1015": "https://t.me/viknadomi_3/25",
                         "Лебединий": "https://t.me/viknadomi_3/27"
                     },
-                    "Шпроси": "GALLERY_PVC_WIN_SPROS",
-                    "Арки": "GALLERY_PVC_WIN_ARCH"
+                    "Шпроси": "CATALOG_PVC_WIN_SPROS",
+                    "Арки": "CATALOG_PVC_WIN_ARCH"
                 }
             },
             "Розсувки": {
-                "HST (найдорожча)": "GALLERY_SLIDE_HST",
-                "Synego Slide (ТОП)": "GALLERY_SLIDE_SYNEGO",
-                "Slinova (всі рухомі)": "GALLERY_SLIDE_SLINOVA",
-                "Відкидна PSK": "GALLERY_SLIDE_PSK",
-                "Гармошка": "GALLERY_SLIDE_FOLD",
+                "HST (найдорожча)": "CATALOG_SLIDE_HST",
+                "Synego Slide (ТОП)": "CATALOG_SLIDE_SYNEGO",
+                "Slinova (всі рухомі)": "CATALOG_SLIDE_SLINOVA",
+                "Відкидна PSK": "CATALOG_SLIDE_PSK",
+                "Гармошка": "CATALOG_SLIDE_FOLD",
                 "Наші роботи": "https://t.me/viknadomi_2/1"
             }
         },
         "Ролети": {
-            "Конструктор VD": "GALLERY_ROLL_CONSTR",
-            "Моноблок SKT": "GALLERY_ROLL_SKT",
-            "Короба (касонетті)": "GALLERY_ROLL_BOX",
-            "Короб на вулиці SK": "GALLERY_ROLL_STREET",
-            "Продовження вікна (Іспанія)": "GALLERY_ROLL_EXT",
+            "Конструктор VD": "CATALOG_ROLL_CONSTR",
+            "Моноблок SKT": "CATALOG_ROLL_SKT",
+            "Короба (касонетті)": "CATALOG_ROLL_BOX",
+            "Короб на вулиці SK": "CATALOG_ROLL_STREET",
+            "Продовження вікна (Іспанія)": "CATALOG_ROLL_EXT",
             "Наші роботи": "https://t.me/viknadomi_2/3"
         },
         "Міжкімнатні двері": {
             "Фото готових дверей": "https://t.me/viknadomi_2/7",
-            "Технічна інформація": "GALLERY_INT_DOOR_TECH"
+            "Технічна інформація": "CATALOG_INT_DOOR_TECH"
         },
         "Двері в квартиру": {
             "Фото готових дверей": "https://t.me/viknadomi_2/9",
-            "Технічна інформація": "GALLERY_APT_DOOR_TECH"
+            "Технічна інформація": "CATALOG_APT_DOOR_TECH"
         },
         "Алюмінієві конструкції": {
-            "Вікна": "GALLERY_ALUM_WIN",
-            "Двері": "GALLERY_ALUM_DOOR",
-            "Розсувки": "GALLERY_ALUM_SLIDE",
+            "Вікна": "CATALOG_ALUM_WIN",
+            "Двері": "CATALOG_ALUM_DOOR",
+            "Розсувки": "CATALOG_ALUM_SLIDE",
             "Наші роботи": "https://t.me/viknadomi_2/5"
         },
-        "Інше": {
+        "Інше (Сітки, Ворота...)": {
             "Сітки": {
                 "Фіксовані на гачках": "GALLERY_NET_FIX",
                 "Плісе (гармошка)": "GALLERY_NET_PLISSE",
