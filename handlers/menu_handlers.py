@@ -161,6 +161,7 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
         await open_menu(callback.message)
         return
 
+    # ВАРІАНТ 1: Це підменю (dict)
     if isinstance(current_structure, dict):
         if callback.message.photo or callback.message.video or callback.message.document:
             await callback.message.delete()
@@ -169,10 +170,12 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
             await callback.message.edit_text(f"📂 <b>{node_name}</b>:", reply_markup=build_menu_keyboard(current_structure, callback_data.path))
         await callback.answer()
 
+    # ВАРІАНТ 2: Це кінцева дія (str)
     elif isinstance(current_structure, str):
         action_code = current_structure
         current_state = await state.get_state()
         
+        # Перевірка для адмінки
         editable_prefixes = ("GALLERY_", "PDF_", "CATALOG_", "ACTION_CONTACTS", "DRAWINGS", "SHEETS", "CHECKLIST", "PRICE", "CERT")
         is_editable = any(action_code.startswith(p) for p in editable_prefixes)
 
@@ -184,27 +187,68 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
              await callback.answer()
              return
 
+        # A. ПОСИЛАННЯ (http)
         if action_code.startswith("http"):
             await callback.message.delete()
+            # ТУТ БУЛА ПОМИЛКА: додано кнопку "На головну"
             kb = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text=f"🔗 Переглянути", url=action_code)],
-                [InlineKeyboardButton(text="🔙 Назад", callback_data=MenuCallback(path=parent_path_str).pack())]
+                [
+                    InlineKeyboardButton(text="🔙 Назад", callback_data=MenuCallback(path=parent_path_str).pack()),
+                    InlineKeyboardButton(text="🏠 На головну", callback_data=MenuCallback(path="").pack())
+                ]
             ])
             await callback.message.answer(f"🌐 <b>{node_name}</b>", reply_markup=kb)
         
+        # B. КОНТАКТИ
         elif action_code == "ACTION_CONTACTS":
-            contacts = "<b>Контакти:</b>\n📞 +380 96 766 9166\n📧 hello@viknadomi.com.ua"
+            contacts_text = (
+                "<b>Контактна інформація</b>\n"
+                "📍 Чернівці, пров. Маланчука, 14\n"
+                "📧 hello@viknadomi.com.ua\n\n"
+                "<b>Call-центр</b>\n"
+                "📞 Менеджери по роботі з партнерами:\n"
+                "+380 96 766 9166 (🇮🇹🇪🇸)\n"
+                "+380 96 051 0901 (Решта 🇪🇺)\n\n"
+                "📞 Технічний відділ\n"
+                "(рекламації, допомога у замірах та монтажу)\n"
+                "+380 66 983 4921\n\n"
+                "📞 Відділ логістики\n"
+                "+380 75 110 4018\n\n"
+                "🕐 <b>Графік роботи:</b>\n"
+                "Пн–Пт: 10:00 – 19:00\n"
+                "Пт: 9:00 – 17:00\n"
+                "Сб: 10:00 – 14:00 (черговий менеджер)\n"
+                "Нд: вихідний"
+            )
             await callback.message.delete()
-            kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🔙 Назад", callback_data=MenuCallback(path=parent_path_str).pack())]])
-            await callback.message.answer(contacts, reply_markup=kb)
+            # ТУТ БУЛА ПОМИЛКА: додано кнопку "На головну"
+            kb = InlineKeyboardMarkup(inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="🔙 Назад", callback_data=MenuCallback(path=parent_path_str).pack()),
+                    InlineKeyboardButton(text="🏠 На головну", callback_data=MenuCallback(path="").pack())
+                ]
+            ])
+            await callback.message.answer(contacts_text, reply_markup=kb)
 
+        # C. СПИСКИ ФАЙЛІВ (Каталоги, PDF, і т.д.)
         elif any(k in action_code for k in ["CATALOG", "PDF_", "DRAWINGS", "SHEETS", "CHECKLIST", "PRICE", "CERT"]):
             await callback.message.delete()
+            # Відправляємо файли
             await send_file(callback.message, action_code, user_id=callback.from_user.id)
-            kb = InlineKeyboardMarkup(inline_keyboard=[[InlineKeyboardButton(text="🔙 Назад", callback_data=MenuCallback(path=parent_path_str).pack())]])
-            await callback.message.answer("⬆️ Файли вище", reply_markup=kb)
+            
+            # ТУТ БУЛА ПОМИЛКА: додано кнопку "На головну" до навігаційного меню після файлів
+            kb = InlineKeyboardMarkup(inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="🔙 Назад", callback_data=MenuCallback(path=parent_path_str).pack()),
+                    InlineKeyboardButton(text="🏠 На головну", callback_data=MenuCallback(path="").pack())
+                ]
+            ])
+            await callback.message.answer("⬆️ Матеріали вище", reply_markup=kb)
         
+        # D. ГАЛЕРЕЯ (Фото-слайдер)
         else:
+            # show_gallery вже має правильну кнопку "На головну" всередині keyboards.py
             await show_gallery(callback.message, action_code, parent_path=parent_path_str, page=0, is_edit=False, user_id=callback.from_user.id)
         
         await callback.answer()
