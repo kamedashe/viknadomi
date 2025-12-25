@@ -4,19 +4,19 @@ MENU_STRUCTURE = {
             "Двері": {
                 "Каталог дверей": "https://t.me/viknadomi_2/11",
                 "Технічна інформація": "https://t.me/viknadomi_3/1",
-                "Види замків": "CATALOG_PVC_DOOR_LOCKS",
+                "Види замків": "GALLERY_PVC_DOOR_LOCKS", # Слайдер за ТЗ
                 "Ручки": {
-                    "Нажимні ручки": "CATALOG_PVC_DOOR_HANDLES_PUSH",       # Повернув підпункт
-                    "Ручка пряма": "CATALOG_PVC_DOOR_HANDLES_STRAIGHT"      # Повернув підпункт
+                    "Нажимні ручки": "GALLERY_PVC_DOOR_HANDLES_PUSH",   # Галерея за ТЗ
+                    "Ручка пряма": "GALLERY_PVC_DOOR_HANDLES_STRAIGHT"  # Галерея за ТЗ
                 }
             },
             "Вікна": {
-                "Профільні системи": "CATALOG_PVC_WIN_PROFILES",
-                "Склопакет": "CATALOG_PVC_WIN_GLASS",
-                "Фурнітура": "CATALOG_PVC_WIN_HARDWARE",
+                "Профільні системи": "CATALOG_PVC_WIN_PROFILES", # Потік відео за ТЗ
+                "Склопакет": "CATALOG_PVC_WIN_GLASS",            # Потік відео за ТЗ
+                "Фурнітура": "CATALOG_PVC_WIN_HARDWARE",         # Потік відео за ТЗ
                 "Інше": {
                     "Детально про вікна": "https://t.me/viknadomi_3/3",
-                    "Ручки": "CATALOG_PVC_WIN_HANDLES",
+                    "Ручки": "GALLERY_PVC_WIN_HANDLES",          # Галерея за ТЗ
                     "Кольорові вікна": {
                         "Білий": "https://t.me/viknadomi_3/5",
                         "Антрацит 7016": "https://t.me/viknadomi_3/7",
@@ -31,16 +31,16 @@ MENU_STRUCTURE = {
                         "Перламутровий 1015": "https://t.me/viknadomi_3/25",
                         "Лебединий": "https://t.me/viknadomi_3/27"
                     },
-                    "Шпроси": "CATALOG_PVC_WIN_SPROS",
-                    "Арки": "CATALOG_PVC_WIN_ARCH"
+                    "Шпроси": "GALLERY_PVC_WIN_SPROS",           # Галерея за ТЗ
+                    "Арки": "GALLERY_PVC_WIN_ARCH"               # Галерея за ТЗ
                 }
             },
             "Розсувки": {
-                "HST (найдорожча)": "CATALOG_SLIDE_HST",
-                "Synego Slide (ТОП)": "CATALOG_SLIDE_SYNEGO",
-                "Slinova (всі рухомі)": "CATALOG_SLIDE_SLINOVA",
-                "Відкидна PSK": "CATALOG_SLIDE_PSK",
-                "Гармошка": "CATALOG_SLIDE_FOLD",
+                "HST (найдорожча)": "CATALOG_SLIDE_HST",         # Потік за ТЗ
+                "Synego Slide (ТОП)": "CATALOG_SLIDE_SYNEGO",    # Потік за ТЗ
+                "Slinova (всі рухомі)": "CATALOG_SLIDE_SLINOVA", # Потік за ТЗ
+                "Відкидна PSK": "CATALOG_SLIDE_PSK",             # Потік за ТЗ
+                "Гармошка": "CATALOG_SLIDE_FOLD",                # Потік за ТЗ
                 "Наші роботи": "https://t.me/viknadomi_2/1"
             }
         },
