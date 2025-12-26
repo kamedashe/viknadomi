@@ -41,8 +41,8 @@ MENU_STRUCTURE = {
                 "Slinova (всі рухомі)": "CATALOG_SLIDE_SLINOVA", # Потік за ТЗ
                 "Відкидна PSK": "CATALOG_SLIDE_PSK",             # Потік за ТЗ
                 "Гармошка": "CATALOG_SLIDE_FOLD",                # Потік за ТЗ
-                "Наші роботи": "https://t.me/viknadomi_2/1"
-            }
+            },
+            "Наші роботи": "https://t.me/viknadomi_2/1"
         },
         "Ролети": {
             "Конструктор VD": "CATALOG_ROLL_CONSTR",
