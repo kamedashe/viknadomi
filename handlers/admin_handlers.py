@@ -165,7 +165,15 @@ async def delete_file_handler(callback: CallbackQuery):
     media_id = int(callback.data.split("_")[2])
     
     await delete_media_by_id(media_id)
-    await callback.message.delete() # Просто видаляємо повідомлення з файлом
+    # await callback.message.delete() # Видалення викликає "пісок"
+    try:
+        await callback.message.edit_caption(
+            caption=f"{callback.message.caption or ''}\n\n❌ <b>Файл видалено адміністратором</b>",
+            reply_markup=None
+        )
+    except:
+        await callback.message.delete()
+    
     await callback.answer("🗑 Файл видалено!")
 
 # --- USER MANAGEMENT & BROADCASTING ---

@@ -64,12 +64,28 @@ async def show_gallery(message: Message, action: str, parent_path: str, page: in
             pass
         await method_answer(media_file, caption=caption, reply_markup=keyboard)
 
-async def send_file(message: Message, action: str, user_id: int | None = None):
+async def delete_previous_messages(message: Message, state: FSMContext):
+    data = await state.get_data()
+    msg_ids = data.get("cleanup_msg_ids", [])
+    if msg_ids:
+        for mid in msg_ids:
+            try:
+                await message.bot.delete_message(chat_id=message.chat.id, message_id=mid)
+            except:
+                pass
+        await state.update_data(cleanup_msg_ids=[])
+
+async def send_file(message: Message, action: str, user_id: int | None = None) -> list[int]:
+    """
+    Sends files and returns a list of sent message IDs.
+    """
     db_media = await get_media_by_category(action)
+    sent_ids = []
     
     if not db_media:
-        await message.answer(f"📂 <b>Розділ:</b> {action}\n(Матеріали ще не додано адміністратором).")
-        return
+        msg = await message.answer(f"📂 <b>Розділ:</b> {action}\n(Матеріали ще не додано адміністратором).")
+        sent_ids.append(msg.message_id)
+        return sent_ids
     
     is_admin = user_id in ADMIN_IDS if user_id else False
     
@@ -81,14 +97,22 @@ async def send_file(message: Message, action: str, user_id: int | None = None):
             ]])
 
         try:
+            sent_msg = None
             if m.file_type == "document":
-                await message.answer_document(m.file_id, caption=m.caption, reply_markup=keyboard)
+                sent_msg = await message.answer_document(m.file_id, caption=m.caption, reply_markup=keyboard)
             elif m.file_type == "photo":
-                await message.answer_photo(m.file_id, caption=m.caption, reply_markup=keyboard)
+                sent_msg = await message.answer_photo(m.file_id, caption=m.caption, reply_markup=keyboard)
             elif m.file_type == "video":
-                await message.answer_video(m.file_id, caption=m.caption, reply_markup=keyboard)
+                sent_msg = await message.answer_video(m.file_id, caption=m.caption, reply_markup=keyboard)
+            
+            if sent_msg:
+                sent_ids.append(sent_msg.message_id)
+                
         except Exception as e:
-            await message.answer(f"⚠️ Помилка надсилання файлу: {e}")
+            err_msg = await message.answer(f"⚠️ Помилка надсилання файлу: {e}")
+            sent_ids.append(err_msg.message_id)
+
+    return sent_ids
 
 async def send_main_menu(bot, chat_id: int):
     try:
@@ -139,9 +163,20 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
         await callback.answer("⛔️ Доступ заборонено.", show_alert=True)
         return
 
+    
+    # Cleaning up previous media batch if exists
+    await delete_previous_messages(callback.message, state)
+
     if not callback_data.path:
-        await callback.message.delete()
-        await send_main_menu(callback.bot, callback.from_user.id)
+        # Back to Main Menu
+        if callback.message.photo or callback.message.video or callback.message.document:
+            await callback.message.delete()
+            await send_main_menu(callback.bot, callback.from_user.id)
+        else:
+             await callback.message.edit_text(
+                "<b>📂 ГОЛОВНЕ МЕНЮ</b>\nОберіть категорію:",
+                reply_markup=build_menu_keyboard(MENU_STRUCTURE)
+            )
         await callback.answer()
         return
 
@@ -180,6 +215,10 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
         is_editable = any(action_code.startswith(p) for p in editable_prefixes)
 
         if current_state == AdminStates.browsing.state and is_editable and callback.from_user.id in ADMIN_IDS:
+             # Admin edit menu - new message or edit?
+             # For admin panel we usually send a new message or edit.
+             # Let's keep existing behavior or optimize.
+             # Existing: answer -> new message.
              await callback.message.answer(
                  f"⚙️ <b>Адмін-панель</b>\nРозділ: {node_name}\nКод: <code>{action_code}</code>",
                  reply_markup=build_admin_actions_keyboard(action_code)
@@ -189,8 +228,6 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
 
         # A. ПОСИЛАННЯ (http)
         if action_code.startswith("http"):
-            await callback.message.delete()
-            # ТУТ БУЛА ПОМИЛКА: додано кнопку "На головну"
             kb = InlineKeyboardMarkup(inline_keyboard=[
                 [InlineKeyboardButton(text=f"🔗 Переглянути", url=action_code)],
                 [
@@ -198,7 +235,13 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
                     InlineKeyboardButton(text="🏠 На головну", callback_data=MenuCallback(path="").pack())
                 ]
             ])
-            await callback.message.answer(f"🌐 <b>{node_name}</b>", reply_markup=kb)
+            text = f"🌐 <b>{node_name}</b>"
+            
+            if callback.message.photo or callback.message.video or callback.message.document:
+                await callback.message.delete()
+                await callback.message.answer(text, reply_markup=kb)
+            else:
+                 await callback.message.edit_text(text, reply_markup=kb)
         
         # B. КОНТАКТИ
         elif action_code == "ACTION_CONTACTS":
@@ -221,30 +264,39 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
                 "Сб: 10:00 – 14:00 (черговий менеджер)\n"
                 "Нд: вихідний"
             )
-            await callback.message.delete()
-            # ТУТ БУЛА ПОМИЛКА: додано кнопку "На головну"
             kb = InlineKeyboardMarkup(inline_keyboard=[
                 [
                     InlineKeyboardButton(text="🔙 Назад", callback_data=MenuCallback(path=parent_path_str).pack()),
                     InlineKeyboardButton(text="🏠 На головну", callback_data=MenuCallback(path="").pack())
                 ]
             ])
-            await callback.message.answer(contacts_text, reply_markup=kb)
+            
+            if callback.message.photo or callback.message.video or callback.message.document:
+                await callback.message.delete()
+                await callback.message.answer(contacts_text, reply_markup=kb)
+            else:
+                await callback.message.edit_text(contacts_text, reply_markup=kb)
 
         # C. СПИСКИ ФАЙЛІВ (Каталоги, PDF, і т.д.)
         elif any(k in action_code for k in ["CATALOG", "PDF_", "DRAWINGS", "SHEETS", "CHECKLIST", "PRICE", "CERT"]):
             await callback.message.delete()
-            # Відправляємо файли
-            await send_file(callback.message, action_code, user_id=callback.from_user.id)
             
-            # ТУТ БУЛА ПОМИЛКА: додано кнопку "На головну" до навігаційного меню після файлів
+            # Відправляємо файли
+            sent_msgs_ids = await send_file(callback.message, action_code, user_id=callback.from_user.id)
+            
             kb = InlineKeyboardMarkup(inline_keyboard=[
                 [
                     InlineKeyboardButton(text="🔙 Назад", callback_data=MenuCallback(path=parent_path_str).pack()),
                     InlineKeyboardButton(text="🏠 На головну", callback_data=MenuCallback(path="").pack())
                 ]
             ])
-            await callback.message.answer("⬆️ Матеріали вище", reply_markup=kb)
+            
+            # Send navigation message ("Materials above")
+            nav_msg = await callback.message.answer("⬆️ Матеріали вище", reply_markup=kb)
+            sent_msgs_ids.append(nav_msg.message_id)
+
+            # Store IDs to clean up later
+            await state.update_data(cleanup_msg_ids=sent_msgs_ids)
         
         # D. ГАЛЕРЕЯ (Фото-слайдер)
         else:
