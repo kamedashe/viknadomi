@@ -170,21 +170,21 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
 
     if not callback_data.path:
         # Back to Main Menu
-        if callback.message.photo or callback.message.video or callback.message.document:
-            await callback.message.delete()
-            await send_main_menu(callback.bot, callback.from_user.id)
-        else:
+        text = "<b>📂 ГОЛОВНЕ МЕНЮ</b>\nОберіть категорію:"
+        kb = build_menu_keyboard(MENU_STRUCTURE)
+        
+        try:
+            if callback.message.photo or callback.message.video or callback.message.document:
+                media = InputMediaPhoto(media=MAIN_MENU_BANNER, caption=text)
+                await callback.message.edit_media(media=media, reply_markup=kb)
+            else:
+                await callback.message.edit_text(text=text, reply_markup=kb)
+        except TelegramBadRequest:
             try:
-                await callback.message.edit_text(
-                    "<b>📂 ГОЛОВНЕ МЕНЮ</b>\nОберіть категорію:",
-                    reply_markup=build_menu_keyboard(MENU_STRUCTURE)
-                )
-            except TelegramBadRequest:
-                try:
-                    await callback.message.delete()
-                except:
-                    pass
-                await send_main_menu(callback.bot, callback.from_user.id)
+                await callback.message.delete()
+            except:
+                pass
+            await send_main_menu(callback.bot, callback.from_user.id)
         await callback.answer()
         return
 
@@ -206,18 +206,21 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
 
     # ВАРІАНТ 1: Це підменю (dict)
     if isinstance(current_structure, dict):
-        if callback.message.photo or callback.message.video or callback.message.document:
-            await callback.message.delete()
-            await callback.message.answer(f"📂 <b>{node_name}</b>:", reply_markup=build_menu_keyboard(current_structure, callback_data.path))
-        else:
+        text = f"📂 <b>{node_name}</b>:"
+        kb = build_menu_keyboard(current_structure, callback_data.path)
+        
+        try:
+            if callback.message.photo or callback.message.video or callback.message.document:
+                media = InputMediaPhoto(media=MAIN_MENU_BANNER, caption=text)
+                await callback.message.edit_media(media=media, reply_markup=kb)
+            else:
+                await callback.message.edit_text(text=text, reply_markup=kb)
+        except TelegramBadRequest:
             try:
-                await callback.message.edit_text(f"📂 <b>{node_name}</b>:", reply_markup=build_menu_keyboard(current_structure, callback_data.path))
-            except TelegramBadRequest:
-                try:
-                    await callback.message.delete()
-                except:
-                    pass
-                await callback.message.answer(f"📂 <b>{node_name}</b>:", reply_markup=build_menu_keyboard(current_structure, callback_data.path))
+                await callback.message.delete()
+            except:
+                pass
+            await callback.message.answer(text, reply_markup=kb)
         await callback.answer()
 
     # ВАРІАНТ 2: Це кінцева дія (str)
@@ -252,18 +255,17 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
             ])
             text = f"🌐 <b>{node_name}</b>"
             
-            if callback.message.photo or callback.message.video or callback.message.document:
-                await callback.message.delete()
+            try:
+                if callback.message.photo or callback.message.video or callback.message.document:
+                    await callback.message.edit_caption(caption=text, reply_markup=kb)
+                else:
+                    await callback.message.edit_text(text=text, reply_markup=kb)
+            except TelegramBadRequest:
+                try:
+                    await callback.message.delete()
+                except:
+                    pass
                 await callback.message.answer(text, reply_markup=kb)
-            else:
-                 try:
-                    await callback.message.edit_text(text, reply_markup=kb)
-                 except TelegramBadRequest:
-                    try:
-                        await callback.message.delete()
-                    except:
-                        pass
-                    await callback.message.answer(text, reply_markup=kb)
         
         # B. КОНТАКТИ
         elif action_code == "ACTION_CONTACTS":
@@ -293,18 +295,17 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
                 ]
             ])
             
-            if callback.message.photo or callback.message.video or callback.message.document:
-                await callback.message.delete()
-                await callback.message.answer(contacts_text, reply_markup=kb)
-            else:
+            try:
+                if callback.message.photo or callback.message.video or callback.message.document:
+                    await callback.message.edit_caption(caption=contacts_text, reply_markup=kb)
+                else:
+                    await callback.message.edit_text(text=contacts_text, reply_markup=kb)
+            except TelegramBadRequest:
                 try:
-                    await callback.message.edit_text(contacts_text, reply_markup=kb)
-                except TelegramBadRequest:
-                    try:
-                        await callback.message.delete()
-                    except:
-                        pass
-                    await callback.message.answer(contacts_text, reply_markup=kb)
+                    await callback.message.delete()
+                except:
+                    pass
+                await callback.message.answer(contacts_text, reply_markup=kb)
 
         # C. СПИСКИ ФАЙЛІВ (Каталоги, PDF, і т.д.)
         elif any(k in action_code for k in ["CATALOG", "PDF_", "DRAWINGS", "SHEETS", "CHECKLIST", "PRICE", "CERT"]):
@@ -333,6 +334,6 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
         # D. ГАЛЕРЕЯ (Фото-слайдер)
         else:
             # show_gallery вже має правильну кнопку "На головну" всередині keyboards.py
-            await show_gallery(callback.message, action_code, parent_path=parent_path_str, page=0, is_edit=False, user_id=callback.from_user.id)
+            await show_gallery(callback.message, action_code, parent_path=parent_path_str, page=0, is_edit=True, user_id=callback.from_user.id)
         
         await callback.answer()
