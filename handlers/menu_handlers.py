@@ -350,8 +350,15 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
 
         # C. СПИСКИ ФАЙЛІВ (Каталоги, PDF, і т.д.)
         elif any(k in action_code for k in ["CATALOG", "PDF_", "DRAWINGS", "SHEETS", "CHECKLIST", "PRICE", "CERT"]):
+            try:
+                await callback.message.delete()
+            except:
+                pass
             
-            nav_text = "📂 <b>Матеріали:</b>"
+            # Відправляємо файли (fresh messages)
+            # We do NOT track their IDs in cleanup_msg_ids because the user wants them KEPT in history.
+            await send_file(callback.message, action_code, user_id=callback.from_user.id)
+            
             kb = InlineKeyboardMarkup(inline_keyboard=[
                 [
                     InlineKeyboardButton(text="🔙 Назад", callback_data=MenuCallback(path=parent_path_str).pack()),
@@ -359,29 +366,11 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
                 ]
             ])
             
-            # Edit instead of delete to avoid explosion
-            try:
-                if callback.message.photo or callback.message.video or callback.message.document:
-                     # Keep the media (or update it?), just change caption logic
-                     # Here we just keep the media type and update caption
-                     await callback.message.edit_caption(caption=nav_text, reply_markup=kb)
-                else:
-                     await callback.message.edit_text(text=nav_text, reply_markup=kb)
-            except TelegramBadRequest:
-                # Fallback
-                try:
-                    await callback.message.delete()
-                except:
-                    pass
-                await callback.message.answer(nav_text, reply_markup=kb)
-            
-            # Відправляємо файли
-            sent_msgs_ids = await send_file(callback.message, action_code, user_id=callback.from_user.id)
-            
-            # Do NOT send "Materials above" footer, as we reused the menu as a header.
-            
-            # Store IDs to clean up later (files only)
-            await state.update_data(cleanup_msg_ids=sent_msgs_ids)
+            # Send navigation message ("Materials above") AT THE BOTTOM
+            nav_msg = await callback.message.answer("⬆️ Матеріали вище", reply_markup=kb)
+
+            # Store ONLY the footer ID to clean up later (so we can edit it back to menu)
+            await state.update_data(cleanup_msg_ids=[nav_msg.message_id])
         
         # D. ГАЛЕРЕЯ (Фото-слайдер)
         else:
