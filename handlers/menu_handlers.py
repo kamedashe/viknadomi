@@ -2,6 +2,7 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message, InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto, InputMediaVideo, InputMediaDocument, FSInputFile
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command
+from aiogram.exceptions import TelegramBadRequest
 from aiogram.utils.media_group import MediaGroupBuilder
 
 import os
@@ -173,10 +174,17 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
             await callback.message.delete()
             await send_main_menu(callback.bot, callback.from_user.id)
         else:
-             await callback.message.edit_text(
-                "<b>📂 ГОЛОВНЕ МЕНЮ</b>\nОберіть категорію:",
-                reply_markup=build_menu_keyboard(MENU_STRUCTURE)
-            )
+            try:
+                await callback.message.edit_text(
+                    "<b>📂 ГОЛОВНЕ МЕНЮ</b>\nОберіть категорію:",
+                    reply_markup=build_menu_keyboard(MENU_STRUCTURE)
+                )
+            except TelegramBadRequest:
+                try:
+                    await callback.message.delete()
+                except:
+                    pass
+                await send_main_menu(callback.bot, callback.from_user.id)
         await callback.answer()
         return
 
@@ -202,7 +210,14 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
             await callback.message.delete()
             await callback.message.answer(f"📂 <b>{node_name}</b>:", reply_markup=build_menu_keyboard(current_structure, callback_data.path))
         else:
-            await callback.message.edit_text(f"📂 <b>{node_name}</b>:", reply_markup=build_menu_keyboard(current_structure, callback_data.path))
+            try:
+                await callback.message.edit_text(f"📂 <b>{node_name}</b>:", reply_markup=build_menu_keyboard(current_structure, callback_data.path))
+            except TelegramBadRequest:
+                try:
+                    await callback.message.delete()
+                except:
+                    pass
+                await callback.message.answer(f"📂 <b>{node_name}</b>:", reply_markup=build_menu_keyboard(current_structure, callback_data.path))
         await callback.answer()
 
     # ВАРІАНТ 2: Це кінцева дія (str)
@@ -241,7 +256,14 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
                 await callback.message.delete()
                 await callback.message.answer(text, reply_markup=kb)
             else:
-                 await callback.message.edit_text(text, reply_markup=kb)
+                 try:
+                    await callback.message.edit_text(text, reply_markup=kb)
+                 except TelegramBadRequest:
+                    try:
+                        await callback.message.delete()
+                    except:
+                        pass
+                    await callback.message.answer(text, reply_markup=kb)
         
         # B. КОНТАКТИ
         elif action_code == "ACTION_CONTACTS":
@@ -275,11 +297,21 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
                 await callback.message.delete()
                 await callback.message.answer(contacts_text, reply_markup=kb)
             else:
-                await callback.message.edit_text(contacts_text, reply_markup=kb)
+                try:
+                    await callback.message.edit_text(contacts_text, reply_markup=kb)
+                except TelegramBadRequest:
+                    try:
+                        await callback.message.delete()
+                    except:
+                        pass
+                    await callback.message.answer(contacts_text, reply_markup=kb)
 
         # C. СПИСКИ ФАЙЛІВ (Каталоги, PDF, і т.д.)
         elif any(k in action_code for k in ["CATALOG", "PDF_", "DRAWINGS", "SHEETS", "CHECKLIST", "PRICE", "CERT"]):
-            await callback.message.delete()
+            try:
+                await callback.message.delete()
+            except:
+                pass
             
             # Відправляємо файли
             sent_msgs_ids = await send_file(callback.message, action_code, user_id=callback.from_user.id)

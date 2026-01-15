@@ -4,6 +4,7 @@ from aiogram import Router, F
 from aiogram.types import CallbackQuery, Message, ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
+from aiogram.exceptions import TelegramBadRequest
 
 from database.requests import update_user_status, get_user, add_media, delete_media_by_category, get_all_users, get_media_by_id, delete_media_by_id, get_media_by_category
 from states import AdminStates
@@ -147,7 +148,10 @@ async def delete_single_media_handler(callback: CallbackQuery):
     # Оновлюємо галерею
     remaining_media = await get_media_by_category(category_code)
     if not remaining_media:
-        await callback.message.delete()
+        try:
+            await callback.message.delete()
+        except:
+            pass
         await callback.message.answer(f"Галерея {category_code} тепер порожня.")
     else:
         await show_gallery(
@@ -171,8 +175,18 @@ async def delete_file_handler(callback: CallbackQuery):
             caption=f"{callback.message.caption or ''}\n\n❌ <b>Файл видалено адміністратором</b>",
             reply_markup=None
         )
-    except:
-        await callback.message.delete()
+    except TelegramBadRequest:
+        try:
+            await callback.message.delete()
+        except:
+            pass
+        await callback.message.answer("❌ <b>Файл видалено адміністратором</b>")
+    except Exception:
+        try: # Fallback for other errors
+            await callback.message.delete()
+            await callback.message.answer("❌ <b>Файл видалено адміністратором</b>")
+        except:
+            pass
     
     await callback.answer("🗑 Файл видалено!")
 
@@ -192,7 +206,14 @@ async def approve_user(callback: CallbackQuery):
         return
     
     await update_user_status(user_id, True)
-    await callback.message.edit_text(f"{callback.message.text}\n\n✅ <b>Схвалено</b>")
+    try:
+        await callback.message.edit_text(f"{callback.message.text}\n\n✅ <b>Схвалено</b>")
+    except TelegramBadRequest:
+        try:
+            await callback.message.delete()
+        except:
+            pass
+        await callback.message.answer(f"{callback.message.text}\n\n✅ <b>Схвалено</b>")
     
     try:
         await callback.bot.send_message(user_id, "✅ Вашу заявку схвалено! Ласкаво просимо.")
@@ -210,7 +231,14 @@ async def reject_user(callback: CallbackQuery):
         await callback.answer("Користувача не знайдено!", show_alert=True)
         return
         
-    await callback.message.edit_text(f"{callback.message.text}\n\n❌ <b>Відхилено</b>")
+    try:
+        await callback.message.edit_text(f"{callback.message.text}\n\n❌ <b>Відхилено</b>")
+    except TelegramBadRequest:
+        try:
+            await callback.message.delete()
+        except:
+            pass
+        await callback.message.answer(f"{callback.message.text}\n\n❌ <b>Відхилено</b>")
     try:
         await callback.bot.send_message(user_id, "❌ Вашу заявку відхилено адміністратором.")
     except:
