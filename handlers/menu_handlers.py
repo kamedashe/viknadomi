@@ -65,11 +65,16 @@ async def show_gallery(message: Message, action: str, parent_path: str, page: in
             pass
         await method_answer(media_file, caption=caption, reply_markup=keyboard)
 
-async def delete_previous_messages(message: Message, state: FSMContext):
+async def delete_previous_messages(message: Message, state: FSMContext, exclude_ids: list[int] = None):
     data = await state.get_data()
     msg_ids = data.get("cleanup_msg_ids", [])
+    if exclude_ids is None:
+        exclude_ids = []
+
     if msg_ids:
         for mid in msg_ids:
+            if mid in exclude_ids:
+                continue
             try:
                 await message.bot.delete_message(chat_id=message.chat.id, message_id=mid)
             except:
@@ -164,14 +169,54 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
         await callback.answer("⛔️ Доступ заборонено.", show_alert=True)
         return
 
+    # 1. RESOLVE TARGET & PATH
+    current_structure = MENU_STRUCTURE
+    target_is_main = not callback_data.path
+    node_name = "ГОЛОВНЕ МЕНЮ"
+    parent_path_str = ""
     
-    # Cleaning up previous media batch if exists
-    await delete_previous_messages(callback.message, state)
+    if not target_is_main:
+        if ":" in callback_data.path:
+            parent_path_str = ":".join(callback_data.path.split(":")[:-1])
+        
+        try:
+            indices = [int(i) for i in callback_data.path.split(":")]
+            for idx in indices:
+                keys = list(current_structure.keys())
+                node_name = keys[idx]
+                current_structure = current_structure[node_name]
+        except Exception:
+            await callback.answer("Помилка навігації.", show_alert=True)
+            await open_menu(callback.message)
+            return
 
-    if not callback_data.path:
-        # Back to Main Menu
+    # 2. CHECK "MATERIALS ABOVE"
+    # The message text is "⬆️ Матеріали вище" OR "📂 Матеріали:"
+    msg_text = callback.message.text or callback.message.caption or ""
+    # Check for keywords indicating this is the navigation message
+    is_materials_message = "Матеріали" in msg_text and ("вище" in msg_text or "📂" in msg_text)
+    
+    # Preserve only if:
+    # - It IS the "Materials" message
+    # - We are NOT going to Main Menu (unless we want to preserve banner?)
+    # - Target is a Submenu (dict) (Text Menu)
+    should_preserve = is_materials_message and not target_is_main and isinstance(current_structure, dict)
+
+    # 3. CLEANUP (with exception)
+    exclude_ids = [callback.message.message_id] if should_preserve else []
+    await delete_previous_messages(callback.message, state, exclude_ids=exclude_ids)
+
+    # 4. MAIN MENU
+    if target_is_main:
         text = "<b>📂 ГОЛОВНЕ МЕНЮ</b>\nОберіть категорію:"
         kb = build_menu_keyboard(MENU_STRUCTURE)
+        
+        # If is_materials_message was true, we might have preserved it or deleted it?
+        # logic above: exclude_ids only if should_preserve.
+        # should_preserve is False if target_is_main.
+        # So it was deleted. We send fresh.
+        # BUT: if it was a photo, and we want to edit it to main menu photo?
+        # Main Menu always uses send_photo or edit_media.
         
         try:
             if callback.message.photo or callback.message.video or callback.message.document:
@@ -188,27 +233,26 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
         await callback.answer()
         return
 
-    current_structure = MENU_STRUCTURE
-    parent_path_str = ""
-    if ":" in callback_data.path:
-        parent_path_str = ":".join(callback_data.path.split(":")[:-1])
-    
-    try:
-        indices = [int(i) for i in callback_data.path.split(":")]
-        for idx in indices:
-            keys = list(current_structure.keys())
-            node_name = keys[idx]
-            current_structure = current_structure[node_name]
-    except Exception:
-        await callback.answer("Помилка навігації.", show_alert=True)
-        await open_menu(callback.message)
-        return
-
-    # ВАРІАНТ 1: Це підменю (dict)
+    # 5. SUBMENU (dict)
     if isinstance(current_structure, dict):
         text = f"📂 <b>{node_name}</b>:"
         kb = build_menu_keyboard(current_structure, callback_data.path)
         
+        # If preserved, explicitly try edit_text
+        if should_preserve:
+            try:
+                await callback.message.edit_text(text=text, reply_markup=kb)
+            except TelegramBadRequest:
+                # Fallback: Delete + Answer
+                try:
+                    await callback.message.delete()
+                except:
+                    pass
+                await callback.message.answer(text, reply_markup=kb)
+            await callback.answer()
+            return
+
+        # Normal logic
         try:
             if callback.message.photo or callback.message.video or callback.message.document:
                 media = InputMediaPhoto(media=MAIN_MENU_BANNER, caption=text)
@@ -222,8 +266,9 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
                 pass
             await callback.message.answer(text, reply_markup=kb)
         await callback.answer()
+        return
 
-    # ВАРІАНТ 2: Це кінцева дія (str)
+    # 6. ACTION (str)
     elif isinstance(current_structure, str):
         action_code = current_structure
         current_state = await state.get_state()
@@ -233,10 +278,6 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
         is_editable = any(action_code.startswith(p) for p in editable_prefixes)
 
         if current_state == AdminStates.browsing.state and is_editable and callback.from_user.id in ADMIN_IDS:
-             # Admin edit menu - new message or edit?
-             # For admin panel we usually send a new message or edit.
-             # Let's keep existing behavior or optimize.
-             # Existing: answer -> new message.
              await callback.message.answer(
                  f"⚙️ <b>Адмін-панель</b>\nРозділ: {node_name}\nКод: <code>{action_code}</code>",
                  reply_markup=build_admin_actions_keyboard(action_code)
@@ -309,14 +350,8 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
 
         # C. СПИСКИ ФАЙЛІВ (Каталоги, PDF, і т.д.)
         elif any(k in action_code for k in ["CATALOG", "PDF_", "DRAWINGS", "SHEETS", "CHECKLIST", "PRICE", "CERT"]):
-            try:
-                await callback.message.delete()
-            except:
-                pass
             
-            # Відправляємо файли
-            sent_msgs_ids = await send_file(callback.message, action_code, user_id=callback.from_user.id)
-            
+            nav_text = "📂 <b>Матеріали:</b>"
             kb = InlineKeyboardMarkup(inline_keyboard=[
                 [
                     InlineKeyboardButton(text="🔙 Назад", callback_data=MenuCallback(path=parent_path_str).pack()),
@@ -324,11 +359,28 @@ async def menu_navigation_handler(callback: CallbackQuery, callback_data: MenuCa
                 ]
             ])
             
-            # Send navigation message ("Materials above")
-            nav_msg = await callback.message.answer("⬆️ Матеріали вище", reply_markup=kb)
-            sent_msgs_ids.append(nav_msg.message_id)
-
-            # Store IDs to clean up later
+            # Edit instead of delete to avoid explosion
+            try:
+                if callback.message.photo or callback.message.video or callback.message.document:
+                     # Keep the media (or update it?), just change caption logic
+                     # Here we just keep the media type and update caption
+                     await callback.message.edit_caption(caption=nav_text, reply_markup=kb)
+                else:
+                     await callback.message.edit_text(text=nav_text, reply_markup=kb)
+            except TelegramBadRequest:
+                # Fallback
+                try:
+                    await callback.message.delete()
+                except:
+                    pass
+                await callback.message.answer(nav_text, reply_markup=kb)
+            
+            # Відправляємо файли
+            sent_msgs_ids = await send_file(callback.message, action_code, user_id=callback.from_user.id)
+            
+            # Do NOT send "Materials above" footer, as we reused the menu as a header.
+            
+            # Store IDs to clean up later (files only)
             await state.update_data(cleanup_msg_ids=sent_msgs_ids)
         
         # D. ГАЛЕРЕЯ (Фото-слайдер)
