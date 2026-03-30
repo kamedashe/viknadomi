@@ -1,6 +1,8 @@
 # ViknaDOMI info bot
 
-👉 **[Hire me on Fiverr to build your custom bot](https://www.fiverr.com/kamedashe/build-a-professional-telegram-bot-with-admin-panel)**
+> 🚀 **Need a custom Telegram Bot like this for your business?**
+> I offer professional development, full web admin panel integration, and reliable server deployment.
+> 👉 **[Hire me on Fiverr to build your custom bot](https://www.fiverr.com/kamedashe/build-a-professional-telegram-bot-with-admin-panel)**
 
 Інформаційний чат-бот для компанії ViknaDOMI, побудований на базі **aiogram 3.x**. Бот слугує цифровим каталогом з обмеженим доступом для партнерів та співробітників.
 
